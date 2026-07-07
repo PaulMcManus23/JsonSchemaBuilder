@@ -1,0 +1,110 @@
+/* ── Fabric grid shim ──────────────────────────────────── */
+.ms-Grid { box-sizing: border-box; }
+.ms-Grid-row { display: flex; flex-wrap: wrap; margin: 0 -8px; }
+.ms-Grid-col { padding: 0 8px; box-sizing: border-box; flex: 0 0 100%; }
+.ms-lg12, .ms-xl12 { flex: 0 0 100%; max-width: 100%; }
+.ms-xl6 { flex: 0 0 50%; max-width: 50%; }
+.ms-xl4 { flex: 0 0 33.33%; max-width: 33.33%; }
+@media (max-width: 1023px) {
+  .ms-xl6 { flex: 0 0 100%; max-width: 100%; }
+  .ms-xl4 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ── Form layout ───────────────────────────────────────── */
+.field-wrapper { margin-top: 5px; }
+
+.field-label, .object-title, .array-title, .checkbox label {
+  font-family: "Segoe UI", sans-serif;
+  color: rgb(68,68,68);
+  font-size: 14px;
+  word-break: break-word;
+  line-height: 1.5em;
+  font-weight: 600;
+  margin: 0; padding: 0; border: 0;
+}
+
+.object-title { font-size: 16px; }
+
+.required-field { color: rgb(234,6,0); }
+
+.field-description, .object-description, .array-description {
+  margin-top: 3px;
+  font-family: "Segoe UI", sans-serif;
+  font-weight: lighter;
+  margin-bottom: 10px;
+  font-size: 13px;
+  min-height: 20px;
+}
+
+.altus-markdown p { margin: revert; }
+.altus-markdown > p:first-of-type { margin-top: 0; }
+.altus-markdown ul { margin: revert; padding: revert; }
+
+/* ── Object/Array wrappers ─────────────────────────────── */
+.object-wrapper { padding: 0; }
+.object-field-grid { padding: 0 !important; }
+.object-title-wrapper, .array-title-wrapper {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 5px;
+  padding-bottom: 2px;
+}
+.array-wrapper .array-title-wrapper { border-bottom: none !important; }
+.property-wrapper { margin-top: 4px; }
+
+/* ── Array list ────────────────────────────────────────── */
+.array-items-wrapper { margin-bottom: 5px; }
+.array-item-wrapper { border: 1px solid #cfcdcc; margin-bottom: 5px; padding: 5px; }
+.array-item-wrapper:last-child { margin-bottom: 10px; }
+.array-item-toolbox { display: flex; float: right; margin: -5px 0; }
+.array-add-button { margin-top: 10px; }
+.no-array-items { font-family: "Segoe UI", sans-serif; margin-bottom: 3px; }
+
+/* ── Dialog array items ────────────────────────────────── */
+.ms-Dialog-content .array-item-dialog-content { margin-top: -30px; margin-bottom: 10px; }
+.array-ok-button { margin-top: 10px; padding-bottom: 10px; }
+
+/* ── Inline table ──────────────────────────────────────── */
+tr.array-inline-item-row .field-label,
+tr.array-inline-item-row .field-description { display: none; }
+tr.array-inline-item-row td.fui-TableCell { padding-top: 7px; padding-bottom: 7px; }
+tr.array-inline-item-row .field-wrapper { margin-top: 0; }
+tr.array-inline-item-row--readonly.fui-TableRow:hover,
+tr.array-inline-item-row--readonly.fui-TableRow:hover td.fui-TableCell { background-color: transparent !important; }
+tr.array-inline-item-row--readonly.fui-TableRow,
+tr.array-inline-item-row--readonly.fui-TableRow td.fui-TableCell { cursor: default !important; }
+
+/* ── Checkbox (Toggle) ─────────────────────────────────── */
+.checkbox { padding-top: 0; }
+.checkbox .ms-Toggle-label { padding-top: 0; padding-bottom: 0; }
+.checkbox .ms-Toggle { margin-bottom: 0; }
+.checkbox .is-checked .ms-Toggle-background { background-color: #41a053 !important; }
+
+/* ── Text/Dropdown fields ──────────────────────────────── */
+.siq-json-entity-lookup .ms-BasePicker-text,
+.siq-json-optionset-select .ms-Dropdown-title,
+.siq-json-optionset-select .ms-Dropdown,
+.siq-textfield .ms-TextField-fieldGroup,
+.siq-textfield .ms-ComboBox,
+.siq-selectfield .ms-Dropdown-title,
+.siq-selectfield .ms-Dropdown { min-height: 37px; }
+
+.siq-json-optionset-select .ms-Dropdown-title,
+.siq-selectfield .ms-Dropdown-title { text-align: left; display: flex; align-items: center; }
+
+/* ── Errors ────────────────────────────────────────────── */
+.text-danger { color: rgb(234,6,0); }
+
+/* ── Left-aligned row ──────────────────────────────────── */
+.left-aligned-row { flex-basis: 100% !important; max-width: 100% !important; }
+@media (min-width: 1024px) {
+  .left-aligned-row .field-wrapper { max-width: calc(50% - 16px); }
+}
+
+/* ── Table dialogs ─────────────────────────────────────── */
+.ms-Dialog-content .array-item-dialog-content tr.fui-TableRow { border-bottom: rgb(224,224,224) 1px solid; }
+.ms-Dialog-content .array-item-dialog-content button.fui-Button { border: rgb(209,209,209) solid 1px; border-radius: 4px; }
+.ms-Dialog-content .array-item-dialog-content button.fui-Button:disabled { background-color: rgb(240,240,240); color: rgb(189,189,189); }
+
+/* ── RJSF default form control ─────────────────────────── */
+.rjsf { margin-bottom: 10px; }
+.clearfix::after { content: ""; clear: both; display: table; }
