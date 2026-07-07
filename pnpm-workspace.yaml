@@ -1,0 +1,4 @@
+onlyBuiltDependencies:
+  - esbuild
+minimumReleaseAgeExclude:
+  - "@fluentui/react-icons@2.0.332"
