@@ -258,6 +258,10 @@ export default function App() {
 
   // ── Schema state ─────────────────────────────────────────
   const [fields, setFields] = useState<SchemaField[]>(loadFields);
+  const [schemaMeta, setSchemaMeta] = useState<{
+    title: string;
+    description: string;
+  }>(() => ls("jsb_meta", { title: "", description: "" }));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeType, setActiveType] = useState<FieldType | null>(null);
   const [importOpen, setImportOpen] = useState(false);
@@ -282,6 +286,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("jsb_fields", JSON.stringify(fields));
   }, [fields]);
+
+  useEffect(() => {
+    localStorage.setItem("jsb_meta", JSON.stringify(schemaMeta));
+  }, [schemaMeta]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -465,6 +473,8 @@ export default function App() {
               setSelectedId(null);
               clearRaw();
             }}
+            schemaMeta={schemaMeta}
+            onSchemaMetaChange={setSchemaMeta}
             width={widths[1]}
           />
           <Resizer onMouseDown={startResize(1)} />
@@ -477,6 +487,7 @@ export default function App() {
           <Resizer onMouseDown={startResize(2)} />
           <PreviewPanel
             fields={fields}
+            schemaMeta={schemaMeta}
             rawSchema={rawSchema}
             rawUiSchema={rawUiSchema}
             onClearRaw={clearRaw}
@@ -484,6 +495,7 @@ export default function App() {
           {chatOpen && (
             <ChatPanel
               fields={fields}
+              schemaMeta={schemaMeta}
               rawSchema={rawSchema}
               onImport={handleImport}
               onClose={() => setChatOpen(false)}

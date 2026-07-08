@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import type { SchemaField, FieldType } from "./types";
 
-export function fieldsToJsonSchema(fields: SchemaField[]): object {
+export function fieldsToJsonSchema(
+  fields: SchemaField[],
+  meta?: { title?: string; description?: string },
+): object {
   const properties: Record<string, object> = {};
   const required: string[] = [];
 
@@ -12,7 +15,8 @@ export function fieldsToJsonSchema(fields: SchemaField[]): object {
 
   return {
     type: "object",
-    title: "Schema",
+    ...(meta?.title ? { title: meta.title } : {}),
+    ...(meta?.description ? { description: meta.description } : {}),
     properties,
     ...(required.length > 0 ? { required } : {}),
   };
@@ -118,6 +122,8 @@ export function fieldsToUiSchema(
       field.itemFields?.length
     ) {
       const itemUi = fieldsToUiSchema(field.itemFields);
+      if (field.uiArrayDisplay === "table")
+        itemUi["useArrayInlineTableRow"] = true;
       if (Object.keys(itemUi).length) fieldUi["items"] = itemUi;
     }
 

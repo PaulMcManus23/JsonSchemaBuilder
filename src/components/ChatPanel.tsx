@@ -167,6 +167,7 @@ interface ChatMessage {
 
 interface Props {
   fields: SchemaField[];
+  schemaMeta?: { title?: string; description?: string };
   rawSchema?: Record<string, unknown> | null;
   onImport: (
     fields: SchemaField[],
@@ -273,6 +274,7 @@ function KeySetup({ onSave }: { onSave: (key: string) => void }) {
 
 export default function ChatPanel({
   fields,
+  schemaMeta,
   rawSchema,
   onImport,
   onClose,
@@ -357,7 +359,8 @@ export default function ChatPanel({
     try {
       // Build current schema context — prefer rawSchema (imported/AI-generated) if present
       const currentSchema =
-        rawSchema ?? (fieldsToJsonSchema(fields) as Record<string, unknown>);
+        rawSchema ??
+        (fieldsToJsonSchema(fields, schemaMeta) as Record<string, unknown>);
       const currentUiSchema = fieldsToUiSchema(fields);
       const hasUi = Object.keys(currentUiSchema).length > 0;
       const schemaContext = [

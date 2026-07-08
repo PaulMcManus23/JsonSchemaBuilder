@@ -1,25 +1,26 @@
-import { useState } from 'react'
-import { Button, Text, Badge } from '@fluentui/react-components'
-import type { SchemaField } from '../types'
-import { fieldsToJsonSchema, fieldsToUiSchema } from '../schemaUtils'
-import { KaizenForm } from '../rjsf/KaizenForm'
+import { useState } from "react";
+import { Button, Text, Badge } from "@fluentui/react-components";
+import type { SchemaField } from "../types";
+import { fieldsToJsonSchema, fieldsToUiSchema } from "../schemaUtils";
+import { KaizenForm } from "../rjsf/KaizenForm";
 
 interface Props {
-  fields: SchemaField[]
-  rawSchema?: Record<string, unknown> | null
-  rawUiSchema?: Record<string, unknown> | null
-  onClearRaw?: () => void
+  fields: SchemaField[];
+  schemaMeta?: { title?: string; description?: string };
+  rawSchema?: Record<string, unknown> | null;
+  rawUiSchema?: Record<string, unknown> | null;
+  onClearRaw?: () => void;
 }
 
 function JsonSection({ label, value }: { label: string; value: unknown }) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(JSON.stringify(value, null, 2)).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
-  }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
 
   return (
     <div className="json-section">
@@ -27,7 +28,11 @@ function JsonSection({ label, value }: { label: string; value: unknown }) {
         <Text
           size={100}
           weight="semibold"
-          style={{ color: 'var(--colorNeutralForeground3)', letterSpacing: '.06em', textTransform: 'uppercase' }}
+          style={{
+            color: "var(--colorNeutralForeground3)",
+            letterSpacing: ".06em",
+            textTransform: "uppercase",
+          }}
         >
           {label}
         </Text>
@@ -35,34 +40,48 @@ function JsonSection({ label, value }: { label: string; value: unknown }) {
           appearance="subtle"
           size="small"
           onClick={handleCopy}
-          style={copied ? { color: 'var(--colorStatusSuccessForeground1)' } : undefined}
+          style={
+            copied
+              ? { color: "var(--colorStatusSuccessForeground1)" }
+              : undefined
+          }
         >
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? "Copied!" : "Copy"}
         </Button>
       </div>
       <pre className="json-block">{JSON.stringify(value, null, 2)}</pre>
     </div>
-  )
+  );
 }
 
-export default function PreviewPanel({ fields, rawSchema, rawUiSchema, onClearRaw }: Props) {
-  const [showJson, setShowJson] = useState(false)
+export default function PreviewPanel({
+  fields,
+  schemaMeta,
+  rawSchema,
+  rawUiSchema,
+  onClearRaw,
+}: Props) {
+  const [showJson, setShowJson] = useState(false);
 
-  const isRaw = !!rawSchema
-  const schema = isRaw ? rawSchema : fieldsToJsonSchema(fields) as Record<string, unknown>
-  const uiSchema = isRaw ? (rawUiSchema ?? {}) : fieldsToUiSchema(fields)
-  const hasContent = isRaw || fields.length > 0
+  const isRaw = !!rawSchema;
+  const schema = isRaw
+    ? rawSchema
+    : (fieldsToJsonSchema(fields, schemaMeta) as Record<string, unknown>);
+  const uiSchema = isRaw ? (rawUiSchema ?? {}) : fieldsToUiSchema(fields);
+  const hasContent = isRaw || fields.length > 0;
 
   return (
     <div className="panel preview-panel">
       <div className="panel-header">
-        <span className="panel-title">{showJson ? 'JSON' : 'Live Preview'}</span>
+        <span className="panel-title">
+          {showJson ? "JSON" : "Live Preview"}
+        </span>
         {isRaw && (
           <Badge
             appearance="tint"
             color="warning"
             size="small"
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
             onClick={onClearRaw}
             title="Using imported schema — click to switch to builder schema"
           >
@@ -72,9 +91,9 @@ export default function PreviewPanel({ fields, rawSchema, rawUiSchema, onClearRa
         <Button
           appearance="secondary"
           size="small"
-          onClick={() => setShowJson(v => !v)}
+          onClick={() => setShowJson((v) => !v)}
         >
-          {showJson ? '← Form' : 'JSON →'}
+          {showJson ? "← Form" : "JSON →"}
         </Button>
       </div>
       <div className="panel-body">
@@ -92,7 +111,12 @@ export default function PreviewPanel({ fields, rawSchema, rawUiSchema, onClearRa
               <Text
                 size={200}
                 as="p"
-                style={{ display: 'block', padding: '48px 16px', textAlign: 'center', color: 'var(--colorNeutralForeground3)' }}
+                style={{
+                  display: "block",
+                  padding: "48px 16px",
+                  textAlign: "center",
+                  color: "var(--colorNeutralForeground3)",
+                }}
               >
                 Add fields to the canvas to see a live form preview.
               </Text>
@@ -103,5 +127,5 @@ export default function PreviewPanel({ fields, rawSchema, rawUiSchema, onClearRa
         )}
       </div>
     </div>
-  )
+  );
 }
