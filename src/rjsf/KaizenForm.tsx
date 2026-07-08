@@ -27,6 +27,7 @@ export const widgets: Record<string, Widget> = {
   EntityLookupArrayWidget: EntityLookupArrayWidget as unknown as Widget,
   OptionSetWidget: OptionSetWidget as unknown as Widget,
   TextWidget,
+  TextareaWidget: TextWidget,
   DateWidget: TextWidget,
   DateTimeWidget: TextWidget,
   ReadOnlyTextWidget,

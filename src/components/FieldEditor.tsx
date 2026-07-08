@@ -40,6 +40,7 @@ const STRING_FORMATS = [
 ];
 
 const KNOWN_WIDGETS = [
+  "textarea",
   "CheckboxWidget",
   "CheckboxesWidget",
   "EntityLookupWidget",
@@ -265,34 +266,26 @@ export default function FieldEditor({ field, onChange }: Props) {
                 ))}
               </Select>
             </Field>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 8,
-              }}
-            >
-              <Field label="Min Length" size="small">
-                <Input
-                  size="small"
-                  type="number"
-                  value={field.minLength?.toString() ?? ""}
-                  onChange={(_, d) =>
-                    set("minLength", d.value === "" ? undefined : +d.value)
-                  }
-                />
-              </Field>
-              <Field label="Max Length" size="small">
-                <Input
-                  size="small"
-                  type="number"
-                  value={field.maxLength?.toString() ?? ""}
-                  onChange={(_, d) =>
-                    set("maxLength", d.value === "" ? undefined : +d.value)
-                  }
-                />
-              </Field>
-            </div>
+            <Field label="Min Length" size="small">
+              <Input
+                size="small"
+                type="number"
+                value={field.minLength?.toString() ?? ""}
+                onChange={(_, d) =>
+                  set("minLength", d.value === "" ? undefined : +d.value)
+                }
+              />
+            </Field>
+            <Field label="Max Length" size="small">
+              <Input
+                size="small"
+                type="number"
+                value={field.maxLength?.toString() ?? ""}
+                onChange={(_, d) =>
+                  set("maxLength", d.value === "" ? undefined : +d.value)
+                }
+              />
+            </Field>
             <Field label="Pattern (regex)" size="small">
               <Input
                 size="small"
@@ -307,6 +300,14 @@ export default function FieldEditor({ field, onChange }: Props) {
                 onChange={(vals) => set("enum", vals.length ? vals : undefined)}
               />
             </Field>
+            <Checkbox
+              label="Multiline (textarea)"
+              size="medium"
+              checked={field.uiWidget === "textarea"}
+              onChange={(_, d) =>
+                set("uiWidget", d.checked ? "textarea" : undefined)
+              }
+            />
           </div>
         </>
       )}
@@ -316,34 +317,26 @@ export default function FieldEditor({ field, onChange }: Props) {
         <>
           <SectionHeading>Numeric Options</SectionHeading>
           <div className="field-stack">
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 8,
-              }}
-            >
-              <Field label="Minimum" size="small">
-                <Input
-                  size="small"
-                  type="number"
-                  value={field.minimum?.toString() ?? ""}
-                  onChange={(_, d) =>
-                    set("minimum", d.value === "" ? undefined : +d.value)
-                  }
-                />
-              </Field>
-              <Field label="Maximum" size="small">
-                <Input
-                  size="small"
-                  type="number"
-                  value={field.maximum?.toString() ?? ""}
-                  onChange={(_, d) =>
-                    set("maximum", d.value === "" ? undefined : +d.value)
-                  }
-                />
-              </Field>
-            </div>
+            <Field label="Minimum" size="small">
+              <Input
+                size="small"
+                type="number"
+                value={field.minimum?.toString() ?? ""}
+                onChange={(_, d) =>
+                  set("minimum", d.value === "" ? undefined : +d.value)
+                }
+              />
+            </Field>
+            <Field label="Maximum" size="small">
+              <Input
+                size="small"
+                type="number"
+                value={field.maximum?.toString() ?? ""}
+                onChange={(_, d) =>
+                  set("maximum", d.value === "" ? undefined : +d.value)
+                }
+              />
+            </Field>
             <Field label="Enum values" size="small">
               <EnumEditor
                 inputType="number"

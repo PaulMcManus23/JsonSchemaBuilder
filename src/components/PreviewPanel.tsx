@@ -10,6 +10,7 @@ interface Props {
   rawSchema?: Record<string, unknown> | null;
   rawUiSchema?: Record<string, unknown> | null;
   onClearRaw?: () => void;
+  width?: number;
 }
 
 function JsonSection({ label, value }: { label: string; value: unknown }) {
@@ -60,6 +61,7 @@ export default function PreviewPanel({
   rawSchema,
   rawUiSchema,
   onClearRaw,
+  width,
 }: Props) {
   const [showJson, setShowJson] = useState(false);
 
@@ -71,7 +73,10 @@ export default function PreviewPanel({
   const hasContent = isRaw || fields.length > 0;
 
   return (
-    <div className="panel preview-panel">
+    <div
+      className="panel preview-panel"
+      style={width ? { width, flexShrink: 0 } : { flex: 1 }}
+    >
       <div className="panel-header">
         <span className="panel-title">
           {showJson ? "JSON" : "Live Preview"}

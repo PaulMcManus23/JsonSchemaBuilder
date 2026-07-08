@@ -111,6 +111,8 @@ export function fieldsToUiSchema(
     } catch {
       /* ignore */
     }
+    if (field.uiWidget === "textarea")
+      extraOpts = { multiline: true, ...extraOpts };
     if (Object.keys(extraOpts).length > 0) fieldUi["ui:options"] = extraOpts;
 
     if (field.type === "object" && field.children?.length) {

@@ -6,6 +6,11 @@ import {
   Spinner,
   Text,
 } from "@fluentui/react-components";
+import {
+  DeleteRegular,
+  KeyRegular,
+  DismissRegular,
+} from "@fluentui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 import type { SchemaField } from "../types";
 import {
@@ -76,7 +81,7 @@ required: add property keys to the parent "required": [...] array
 
 ── UI SCHEMA ────────────────────────────────────────────────────────────────
 
-"ui:widget": CheckboxWidget | CheckboxesWidget | SelectWidget | OptionSetWidget |
+"ui:widget": textarea | CheckboxWidget | CheckboxesWidget | SelectWidget | OptionSetWidget |
              TextWidget | ReadOnlyTextWidget | FormattedIntegerWidget |
              ColourPickerWidget | EntityLookupWidget | EntityLookupArrayWidget
 
@@ -175,6 +180,7 @@ interface Props {
     rawSchema: Record<string, unknown>,
   ) => void;
   onClose: () => void;
+  width?: number;
 }
 
 // ── Sub-components ────────────────────────────────────────
@@ -278,6 +284,7 @@ export default function ChatPanel({
   rawSchema,
   onImport,
   onClose,
+  width,
 }: Props) {
   const [apiKey, setApiKey] = useState<string>(loadKey);
   const [showSetup, setShowSetup] = useState<boolean>(() => !loadKey());
@@ -483,10 +490,9 @@ export default function ChatPanel({
   );
 
   return (
-    <div className="chat-panel">
+    <div className="chat-panel" style={width ? { width } : undefined}>
       {/* Header */}
       <div className="chat-panel__header">
-        <span className="chat-panel__header-title">✦ AI</span>
         {!showSetup && (
           <Select
             size="small"
@@ -513,9 +519,8 @@ export default function ChatPanel({
               size="small"
               title="Clear chat history"
               onClick={handleClearMessages}
-            >
-              🗑
-            </Button>
+              icon={<DeleteRegular />}
+            />
           )}
           {!showSetup && (
             <Button
@@ -523,18 +528,16 @@ export default function ChatPanel({
               size="small"
               title="Change API key"
               onClick={() => setShowSetup(true)}
-            >
-              🔑
-            </Button>
+              icon={<KeyRegular />}
+            />
           )}
           <Button
             appearance="subtle"
             size="small"
             onClick={onClose}
             title="Close AI panel"
-          >
-            ✕
-          </Button>
+            icon={<DismissRegular />}
+          />
         </div>
       </div>
 

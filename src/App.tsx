@@ -94,7 +94,7 @@ function Resizer({
 }
 
 // ── App ────────────────────────────────────────────────────
-const PALETTE_MIN = 140;
+const PALETTE_MIN = 110;
 const PANEL_MIN = 180;
 const DIVIDER_W = 4;
 
@@ -153,19 +153,19 @@ function loadFields(): SchemaField[] {
   }
 }
 
-function loadWidths(): [number, number, number] | null {
+function loadWidths(): [number, number, number, number, number] | null {
   try {
     const v = localStorage.getItem("jsb_widths");
     if (v === null) return null;
     const parsed = JSON.parse(v);
     if (
       Array.isArray(parsed) &&
-      parsed.length === 3 &&
+      parsed.length === 5 &&
       parsed.every(
         (n: unknown) => typeof n === "number" && n > 0 && isFinite(n),
       )
     ) {
-      return parsed as [number, number, number];
+      return parsed as [number, number, number, number, number];
     }
   } catch {}
   return null;
@@ -183,13 +183,13 @@ export default function App() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [widths, setWidths] = useState<[number, number, number]>(
-    () => loadWidths() ?? [190, 360, 320],
-  );
+  const [widths, setWidths] = useState<
+    [number, number, number, number, number]
+  >(() => loadWidths() ?? [160, 240, 200, 480, 260]);
   const resizingRef = useRef<{
     divider: number;
     startX: number;
-    startWidths: [number, number, number];
+    startWidths: [number, number, number, number, number];
   } | null>(null);
 
   // Auto-distribute on first visit only (no saved widths yet)
@@ -197,11 +197,14 @@ export default function App() {
     if (localStorage.getItem("jsb_widths")) return;
     const w = containerRef.current?.getBoundingClientRect().width;
     if (!w) return;
-    const available = w - 3 * DIVIDER_W;
-    const pal = 190;
-    const rest = available - pal;
-    const each = Math.floor(rest / 3);
-    setWidths([pal, each, each]);
+    const available = w - 4 * DIVIDER_W;
+    const pal = 130;
+    const chat = 280;
+    const preview = Math.floor(available * 0.4);
+    const rest = available - pal - preview - chat;
+    const canvas = Math.floor(rest * 0.55);
+    const editor = rest - canvas;
+    setWidths([pal, canvas, editor, preview, chat]);
   }, []);
 
   useEffect(() => {
@@ -213,21 +216,20 @@ export default function App() {
       const r = resizingRef.current;
       if (!r) return;
       const delta = e.clientX - r.startX;
-      const w = [...r.startWidths] as [number, number, number];
+      const w = [...r.startWidths] as [number, number, number, number, number];
+      const mins = [PALETTE_MIN, PANEL_MIN, PANEL_MIN, PANEL_MIN, PANEL_MIN];
       if (r.divider === 0) {
-        w[0] = Math.max(PALETTE_MIN, r.startWidths[0] + delta);
-        w[1] = Math.max(
-          PANEL_MIN,
-          r.startWidths[1] - (w[0] - r.startWidths[0]),
-        );
+        w[0] = Math.max(mins[0], r.startWidths[0] + delta);
+        w[1] = Math.max(mins[1], r.startWidths[1] - (w[0] - r.startWidths[0]));
       } else if (r.divider === 1) {
-        w[1] = Math.max(PANEL_MIN, r.startWidths[1] + delta);
-        w[2] = Math.max(
-          PANEL_MIN,
-          r.startWidths[2] - (w[1] - r.startWidths[1]),
-        );
+        w[1] = Math.max(mins[1], r.startWidths[1] + delta);
+        w[2] = Math.max(mins[2], r.startWidths[2] - (w[1] - r.startWidths[1]));
+      } else if (r.divider === 2) {
+        w[2] = Math.max(mins[2], r.startWidths[2] + delta);
+        w[3] = Math.max(mins[3], r.startWidths[3] - (w[2] - r.startWidths[2]));
       } else {
-        w[2] = Math.max(PANEL_MIN, r.startWidths[2] + delta);
+        w[3] = Math.max(mins[3], r.startWidths[3] + delta);
+        w[4] = Math.max(mins[4], r.startWidths[4] - (w[3] - r.startWidths[3]));
       }
       setWidths(w);
     };
@@ -250,7 +252,7 @@ export default function App() {
     resizingRef.current = {
       divider,
       startX: e.clientX,
-      startWidths: [...widths] as [number, number, number],
+      startWidths: [...widths] as [number, number, number, number, number],
     };
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
@@ -266,7 +268,7 @@ export default function App() {
   const [activeType, setActiveType] = useState<FieldType | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [mockOpen, setMockOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
 
   // Raw imported schema — used directly by PreviewPanel when present, bypassing field derivation.
   // Not persisted; re-import after a page refresh.
@@ -491,15 +493,20 @@ export default function App() {
             rawSchema={rawSchema}
             rawUiSchema={rawUiSchema}
             onClearRaw={clearRaw}
+            width={widths[3]}
           />
           {chatOpen && (
-            <ChatPanel
-              fields={fields}
-              schemaMeta={schemaMeta}
-              rawSchema={rawSchema}
-              onImport={handleImport}
-              onClose={() => setChatOpen(false)}
-            />
+            <>
+              <Resizer onMouseDown={startResize(3)} />
+              <ChatPanel
+                fields={fields}
+                schemaMeta={schemaMeta}
+                rawSchema={rawSchema}
+                onImport={handleImport}
+                onClose={() => setChatOpen(false)}
+                width={widths[4]}
+              />
+            </>
           )}
         </div>
 

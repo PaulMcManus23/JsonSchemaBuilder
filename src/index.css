@@ -126,7 +126,7 @@ body {
 }
 
 .palette-section {
-  padding: 12px;
+  padding: 8px 6px;
 }
 
 .palette-section h3 {
@@ -141,8 +141,8 @@ body {
 .palette-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
+  gap: 6px;
+  padding: 5px 6px;
   border-radius: var(--radius);
   cursor: grab;
   user-select: none;
@@ -162,13 +162,13 @@ body {
 }
 
 .palette-item .pi-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   flex-shrink: 0;
 }
 
@@ -676,7 +676,7 @@ body {
 
 /* ── Chat panel ───────────────────────────────────── */
 .chat-panel {
-  width: 320px;
+  min-width: 180px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -688,8 +688,8 @@ body {
 .chat-panel__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 4px;
+  padding: 6px 8px;
   border-bottom: 1px solid var(--colorNeutralStroke2);
   flex-shrink: 0;
 }
@@ -709,8 +709,8 @@ body {
 .chat-panel__header-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
-  margin-left: auto;
+  gap: 0;
+  flex-shrink: 0;
 }
 
 /* Messages area */

@@ -35,6 +35,7 @@ const allowedProps = [
   "maskFormat",
   "type",
   "list",
+  "rows",
 ];
 
 function pick(obj: Record<string, any>, keys: string[]): Record<string, any> {
@@ -90,6 +91,33 @@ function TextWidget({
       : schema.type === "string"
         ? "text"
         : `${schema.type}`;
+
+  // Textarea mode: signalled by ui:options.multiline, ui:options.rows, or props.multiline
+  const rows = (options as any).rows as number | undefined;
+  const isMultiline =
+    !!(options as any).multiline || rows !== undefined || !!uiProps.multiline;
+
+  if (isMultiline) {
+    return (
+      <TextField
+        id={id}
+        value={value || value === 0 ? value : ""}
+        multiline
+        resizable
+        rows={rows ?? 3}
+        onChange={_onChange as any}
+        onBlur={_onBlur as any}
+        onFocus={_onFocus as any}
+        disabled={disabled}
+        readOnly={readonly}
+        placeholder={placeholder}
+        autoFocus={autofocus}
+        errorMessage={(rawErrors || []).join("\n")}
+        className={`${uiProps.className ?? ""} siq-textfield`}
+      />
+    );
+  }
+
   uiProps.className = `${uiProps.className ?? ""} siq-textfield`;
   uiProps.required = false;
 
