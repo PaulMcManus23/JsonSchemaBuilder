@@ -1,4 +1,4 @@
-import { useSortable } from '@dnd-kit/sortable'
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { SchemaField } from '../types'
 import DropZone from './DropZone'
@@ -19,32 +19,43 @@ interface Props {
   onDelete: (id: string) => void
 }
 
-function ChildRow({ child, selectedId, onSelect, onDelete, accent }: {
+function ChildRow({ child, selectedId, onSelect, onDelete, accent, parentId, kind }: {
   child: SchemaField
   selectedId: string | null
   onSelect: (id: string) => void
   onDelete: (id: string) => void
   accent?: string
+  parentId: string
+  kind: 'children' | 'itemFields'
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: child.id,
+    data: { parentId, kind, fieldId: child.id },
+  })
   const color = TYPE_COLORS[child.type] ?? '#888'
   return (
     <div
-      className={`field-row${selectedId === child.id ? ' selected' : ''}`}
-      style={{ marginBottom: 5, ...(accent ? { borderLeftColor: `${accent}44` } : {}) }}
-      onClick={() => onSelect(child.id)}
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
     >
-      <span style={{ width: 14, flexShrink: 0 }} />
-      <span className="type-badge" style={{ background: `${color}22`, color }}>
-        {child.type}
-      </span>
-      <span className={`field-name${!child.name ? ' unnamed' : ''}`}>
-        {child.name || 'unnamed'}
-      </span>
-      {child.required && <span className="req-badge">*</span>}
-      <button
-        className="delete-btn"
-        onClick={e => { e.stopPropagation(); onDelete(child.id) }}
-      >✕</button>
+      <div
+        className={`field-row${selectedId === child.id ? ' selected' : ''}`}
+        style={{ marginBottom: 5, ...(accent ? { borderLeftColor: `${accent}44` } : {}) }}
+        onClick={() => onSelect(child.id)}
+      >
+        <span className="drag-handle" {...listeners} {...attributes}>⠿</span>
+        <span className="type-badge" style={{ background: `${color}22`, color }}>
+          {child.type}
+        </span>
+        <span className={`field-name${!child.name ? ' unnamed' : ''}`}>
+          {child.name || 'unnamed'}
+        </span>
+        {child.required && <span className="req-badge">*</span>}
+        <button
+          className="delete-btn"
+          onClick={e => { e.stopPropagation(); onDelete(child.id) }}
+        >✕</button>
+      </div>
     </div>
   )
 }

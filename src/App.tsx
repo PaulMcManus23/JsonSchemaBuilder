@@ -32,6 +32,7 @@ import EditorPanel from "./components/EditorPanel";
 import PreviewPanel from "./components/PreviewPanel";
 import ImportDialog from "./components/ImportDialog";
 import MockDataDialog from "./components/MockDataDialog";
+import ChatPanel from "./components/ChatPanel";
 
 // ── Helpers ────────────────────────────────────────────────
 function makeField(type: FieldType): SchemaField {
@@ -261,6 +262,7 @@ export default function App() {
   const [activeType, setActiveType] = useState<FieldType | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [mockOpen, setMockOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Raw imported schema — used directly by PreviewPanel when present, bypassing field derivation.
   // Not persisted; re-import after a page refresh.
@@ -427,6 +429,13 @@ export default function App() {
               {isDark ? "Light mode" : "Dark mode"}
             </ToggleButton>
             <Button
+              appearance={chatOpen ? "primary" : "secondary"}
+              size="small"
+              onClick={() => setChatOpen((v) => !v)}
+            >
+              ✦ AI
+            </Button>
+            <Button
               appearance="secondary"
               size="small"
               onClick={() => setImportOpen(true)}
@@ -472,6 +481,14 @@ export default function App() {
             rawUiSchema={rawUiSchema}
             onClearRaw={clearRaw}
           />
+          {chatOpen && (
+            <ChatPanel
+              fields={fields}
+              rawSchema={rawSchema}
+              onImport={handleImport}
+              onClose={() => setChatOpen(false)}
+            />
+          )}
         </div>
 
         <ImportDialog

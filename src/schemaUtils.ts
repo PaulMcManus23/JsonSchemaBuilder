@@ -39,6 +39,10 @@ function fieldToSchema(field: SchemaField): object {
   if (field.type === 'number' || field.type === 'integer') {
     if (field.minimum !== undefined) base.minimum = field.minimum
     if (field.maximum !== undefined) base.maximum = field.maximum
+    if (field.enum && field.enum.length > 0) {
+      base.enum = field.enum.map(Number)
+      delete base.type
+    }
   }
 
   if (field.type === 'array') {

@@ -7,6 +7,7 @@ import {
   Checkbox,
   Text,
   Divider,
+  Button,
 } from '@fluentui/react-components'
 import type { SchemaField, FieldType } from '../types'
 
@@ -23,6 +24,57 @@ const KNOWN_WIDGETS = [
 interface Props {
   field: SchemaField | null
   onChange: (updated: SchemaField) => void
+}
+
+function EnumEditor({ values, onChange, inputType = 'text' }: { values: string[]; onChange: (v: string[]) => void; inputType?: 'text' | 'number' }) {
+  const [draft, setDraft] = React.useState('')
+
+  const add = () => {
+    const v = draft.trim()
+    if (!v || values.includes(v)) return
+    if (inputType === 'number' && isNaN(Number(v))) return
+    onChange([...values, v])
+    setDraft('')
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {values.map((v, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'var(--colorNeutralBackground4)',
+            border: '1px solid var(--colorNeutralStroke2)',
+            borderRadius: 4, padding: '3px 6px 3px 8px',
+          }}
+        >
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--colorNeutralForeground1)' }}>{v}</span>
+          <button
+            title="Remove"
+            onClick={() => onChange(values.filter((_, idx) => idx !== i))}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--colorNeutralForeground3)', fontSize: 11,
+              padding: '0 2px', lineHeight: 1,
+            }}
+          >✕</button>
+        </div>
+      ))}
+      <div style={{ display: 'flex', gap: 4, marginTop: values.length ? 2 : 0 }}>
+        <Input
+          size="small"
+          type={inputType}
+          value={draft}
+          onChange={(_, d) => setDraft(d.value)}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+          placeholder={inputType === 'number' ? '0' : 'Add value…'}
+          style={{ flex: 1 }}
+        />
+        <Button size="small" appearance="subtle" onClick={add} disabled={!draft.trim()}>+</Button>
+      </div>
+    </div>
+  )
 }
 
 function SectionHeading({ children }: { children: string }) {
@@ -131,15 +183,10 @@ export default function FieldEditor({ field, onChange }: Props) {
             <Field label="Pattern (regex)" size="small">
               <Input size="small" value={field.pattern ?? ''} onChange={(_, d) => set('pattern', d.value || undefined)} placeholder="^[a-z]+$" />
             </Field>
-            <Field label="Enum values (comma-separated)" size="small">
-              <Input
-                size="small"
-                value={(field.enum ?? []).join(', ')}
-                onChange={(_, d) => {
-                  const vals = d.value.split(',').map(s => s.trim()).filter(Boolean)
-                  set('enum', vals.length ? vals : undefined)
-                }}
-                placeholder="opt1, opt2, opt3"
+            <Field label="Enum values" size="small">
+              <EnumEditor
+                values={field.enum ?? []}
+                onChange={vals => set('enum', vals.length ? vals : undefined)}
               />
             </Field>
           </div>
@@ -159,6 +206,13 @@ export default function FieldEditor({ field, onChange }: Props) {
                 <Input size="small" type="number" value={field.maximum?.toString() ?? ''} onChange={(_, d) => set('maximum', d.value === '' ? undefined : +d.value)} />
               </Field>
             </div>
+            <Field label="Enum values" size="small">
+              <EnumEditor
+                inputType="number"
+                values={field.enum ?? []}
+                onChange={vals => set('enum', vals.length ? vals : undefined)}
+              />
+            </Field>
           </div>
         </>
       )}
