@@ -837,7 +837,7 @@ body {
 
 .chat-panel__input {
   flex: 1;
-  resize: none;
+  resize: vertical;
   border: 1px solid var(--colorNeutralStroke1);
   border-radius: 6px;
   padding: 7px 10px;
