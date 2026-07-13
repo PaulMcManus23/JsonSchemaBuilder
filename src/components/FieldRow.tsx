@@ -21,79 +21,10 @@ interface Props {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
-}
-
-function ChildRow({
-  child,
-  selectedId,
-  onSelect,
-  onDelete,
-  accent,
-  parentId,
-  kind,
-}: {
-  child: SchemaField;
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-  onDelete: (id: string) => void;
+  // Present when this row is nested inside another field's children/itemFields.
+  parentId?: string;
+  kind?: "children" | "itemFields";
   accent?: string;
-  parentId: string;
-  kind: "children" | "itemFields";
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: child.id,
-    data: { parentId, kind, fieldId: child.id },
-  });
-  const color = TYPE_COLORS[child.type] ?? "#888";
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.4 : 1,
-      }}
-    >
-      <div
-        className={`field-row${selectedId === child.id ? " selected" : ""}`}
-        style={{
-          marginBottom: 5,
-          ...(accent ? { borderLeftColor: `${accent}44` } : {}),
-        }}
-        onClick={() => onSelect(child.id)}
-      >
-        <span className="drag-handle" {...listeners} {...attributes}>
-          ⠿
-        </span>
-        <span
-          className="type-badge"
-          style={{ background: `${color}22`, color }}
-        >
-          {child.type}
-        </span>
-        <span className={`field-name${!child.name ? " unnamed" : ""}`}>
-          {child.name || "unnamed"}
-        </span>
-        {child.required && <span className="req-badge">*</span>}
-        <button
-          className="delete-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(child.id);
-          }}
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
 }
 
 export default function FieldRow({
@@ -101,6 +32,9 @@ export default function FieldRow({
   selectedId,
   onSelect,
   onDelete,
+  parentId,
+  kind,
+  accent,
 }: Props) {
   const {
     attributes,
@@ -111,60 +45,83 @@ export default function FieldRow({
     isDragging,
   } = useSortable({
     id: field.id,
-    data: { fieldId: field.id },
+    data:
+      parentId && kind ? { parentId, kind, fieldId: field.id } : { fieldId: field.id },
   });
 
   const color = TYPE_COLORS[field.type] ?? "#888";
+  const isNested = parentId !== undefined;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.4 : 1,
-      }}
-    >
+    <div>
+      {/* Sortable/droppable measurement is scoped to just this row — not its
+          nested children — so dragging near a container with a deep subtree
+          resolves against the row the pointer is actually over, not the
+          container's much taller bounding box. */}
       <div
-        className={`field-row${selectedId === field.id ? " selected" : ""}`}
-        onClick={() => onSelect(field.id)}
+        ref={setNodeRef}
+        style={{
+          transform: CSS.Transform.toString(transform),
+          transition,
+          opacity: isDragging ? 0.4 : 1,
+        }}
       >
-        <span className="drag-handle" {...listeners} {...attributes}>
-          ⠿
-        </span>
-        <span
-          className="type-badge"
-          style={{ background: `${color}22`, color }}
+        <div
+          className={`field-row${selectedId === field.id ? " selected" : ""}`}
+          style={
+            isNested
+              ? {
+                  marginBottom: 5,
+                  ...(accent ? { borderLeftColor: `${accent}44` } : {}),
+                }
+              : undefined
+          }
+          onClick={() => onSelect(field.id)}
         >
-          {field.type}
-        </span>
-        <span className={`field-name${!field.name ? " unnamed" : ""}`}>
-          {field.name || "unnamed"}
-        </span>
-        {field.required && <span className="req-badge">*</span>}
-        <button
-          className="delete-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(field.id);
-          }}
-        >
-          ✕
-        </button>
+          <span className="drag-handle" {...listeners} {...attributes}>
+            ⠿
+          </span>
+          <span
+            className="type-badge"
+            style={{ background: `${color}22`, color }}
+          >
+            {field.type}
+          </span>
+          <span className={`field-name${!field.name ? " unnamed" : ""}`}>
+            {field.name || "unnamed"}
+          </span>
+          {field.required && <span className="req-badge">*</span>}
+          <button
+            className="delete-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(field.id);
+            }}
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {/* Object children */}
       {field.type === "object" && (
         <div className="field-children">
-          {(field.children ?? []).map((child) => (
-            <ChildRow
-              key={child.id}
-              child={child}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              onDelete={onDelete}
-            />
-          ))}
+          <SortableContext
+            items={(field.children ?? []).map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {(field.children ?? []).map((child) => (
+              <FieldRow
+                key={child.id}
+                field={child}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                onDelete={onDelete}
+                parentId={field.id}
+                kind="children"
+              />
+            ))}
+          </SortableContext>
           <DropZone parentId={field.id} kind="children" />
         </div>
       )}
@@ -173,16 +130,23 @@ export default function FieldRow({
       {field.type === "array" && (
         <div className="field-children field-array-items">
           <div className="field-nesting-label">item schema</div>
-          {(field.itemFields ?? []).map((itemField) => (
-            <ChildRow
-              key={itemField.id}
-              child={itemField}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              onDelete={onDelete}
-              accent="#fd79a8"
-            />
-          ))}
+          <SortableContext
+            items={(field.itemFields ?? []).map((f) => f.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {(field.itemFields ?? []).map((itemField) => (
+              <FieldRow
+                key={itemField.id}
+                field={itemField}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                onDelete={onDelete}
+                accent="#fd79a8"
+                parentId={field.id}
+                kind="itemFields"
+              />
+            ))}
+          </SortableContext>
           <DropZone parentId={field.id} kind="itemFields" />
         </div>
       )}

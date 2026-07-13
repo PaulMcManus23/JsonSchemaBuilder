@@ -10,6 +10,8 @@ interface Props {
   rawSchema?: Record<string, unknown> | null;
   rawUiSchema?: Record<string, unknown> | null;
   onClearRaw?: () => void;
+  formData?: unknown;
+  onFormDataChange?: (formData: unknown) => void;
   width?: number;
 }
 
@@ -61,6 +63,8 @@ export default function PreviewPanel({
   rawSchema,
   rawUiSchema,
   onClearRaw,
+  formData,
+  onFormDataChange,
   width,
 }: Props) {
   const [showJson, setShowJson] = useState(false);
@@ -126,7 +130,12 @@ export default function PreviewPanel({
                 Add fields to the canvas to see a live form preview.
               </Text>
             ) : (
-              <KaizenForm schema={schema} uiSchema={uiSchema} />
+              <KaizenForm
+                schema={schema}
+                uiSchema={uiSchema}
+                formData={formData}
+                onChange={onFormDataChange}
+              />
             )}
           </div>
         )}

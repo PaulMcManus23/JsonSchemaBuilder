@@ -131,6 +131,10 @@ export function fieldsToUiSchema(
 
     if (Object.keys(fieldUi).length) ui[key] = fieldUi;
   }
+  // Explicit order (as opposed to relying on properties-object key order) so that
+  // pure reordering is seen as a uiSchema change — RJSF's Form skips re-rendering
+  // when a deep-equal check finds no change, and object key order doesn't count.
+  if (fields.length > 0) ui["ui:order"] = fields.map((f) => f.name || f.id);
   return ui;
 }
 

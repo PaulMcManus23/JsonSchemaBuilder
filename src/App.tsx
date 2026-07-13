@@ -9,6 +9,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -63,6 +64,45 @@ function updateFieldInTree(
       updated = {
         ...updated,
         itemFields: updateFieldInTree(f.itemFields, id, updater),
+      };
+    return updated;
+  });
+}
+
+function reorderWithinParent(
+  fields: SchemaField[],
+  parentId: string,
+  kind: "children" | "itemFields",
+  activeId: string,
+  overId: string,
+): SchemaField[] {
+  return fields.map((f) => {
+    if (f.id === parentId) {
+      const list = (kind === "children" ? f.children : f.itemFields) ?? [];
+      const oi = list.findIndex((c) => c.id === activeId);
+      const ni = list.findIndex((c) => c.id === overId);
+      if (oi === -1 || ni === -1) return f;
+      const reordered = arrayMove(list, oi, ni);
+      return kind === "children"
+        ? { ...f, children: reordered }
+        : { ...f, itemFields: reordered };
+    }
+    let updated = f;
+    if (f.children)
+      updated = {
+        ...updated,
+        children: reorderWithinParent(f.children, parentId, kind, activeId, overId),
+      };
+    if (f.itemFields)
+      updated = {
+        ...updated,
+        itemFields: reorderWithinParent(
+          f.itemFields,
+          parentId,
+          kind,
+          activeId,
+          overId,
+        ),
       };
     return updated;
   });
@@ -285,6 +325,11 @@ export default function App() {
     setRawUiSchema(null);
   }, []);
 
+  // Values typed into the Live Preview form — persisted so they survive a refresh.
+  const [previewData, setPreviewData] = useState<unknown>(() =>
+    ls("jsb_previewData", {}),
+  );
+
   useEffect(() => {
     localStorage.setItem("jsb_fields", JSON.stringify(fields));
   }, [fields]);
@@ -292,6 +337,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("jsb_meta", JSON.stringify(schemaMeta));
   }, [schemaMeta]);
+
+  useEffect(() => {
+    localStorage.setItem("jsb_previewData", JSON.stringify(previewData));
+  }, [previewData]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -355,6 +404,21 @@ export default function App() {
       }
 
       if (active.id !== over.id) {
+        const parentId = aData?.parentId as string | undefined;
+        const kind = aData?.kind as "children" | "itemFields" | undefined;
+        if (parentId && kind) {
+          setFields((prev) =>
+            reorderWithinParent(
+              prev,
+              parentId,
+              kind,
+              active.id as string,
+              over.id as string,
+            ),
+          );
+          return;
+        }
+
         const oi = fields.findIndex((f) => f.id === active.id);
         const ni = fields.findIndex((f) => f.id === over.id);
         if (oi !== -1 && ni !== -1)
@@ -412,6 +476,7 @@ export default function App() {
     >
       <DndContext
         sensors={sensors}
+        collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
@@ -474,6 +539,7 @@ export default function App() {
               setFields([]);
               setSelectedId(null);
               clearRaw();
+              setPreviewData({});
             }}
             schemaMeta={schemaMeta}
             onSchemaMetaChange={setSchemaMeta}
@@ -493,6 +559,8 @@ export default function App() {
             rawSchema={rawSchema}
             rawUiSchema={rawUiSchema}
             onClearRaw={clearRaw}
+            formData={previewData}
+            onFormDataChange={setPreviewData}
             width={widths[3]}
           />
           {chatOpen && (
